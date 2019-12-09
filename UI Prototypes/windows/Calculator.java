@@ -9,16 +9,110 @@ import java.text.*;
 import javax.swing.text.*;
 import javax.swing.*;
 import java.util.*;
+import javafx.beans.binding.Bindings;
 import static javax.swing.SwingConstants.RIGHT;
 import javax.swing.event.ChangeEvent;
 import javax.swing.text.NumberFormatter;
 
-public class Calculator extends JFrame{
+public class Calculator extends JFrame implements KeyListener{
     private static class Constants 
     {
         static final int WIDTH = 220;
         static final int HEIGHT = 280;
     }
+    
+    public void keyPressed(KeyEvent e) 
+    {
+        int key = e.getKeyCode();
+        switch (key)
+        {
+            case 48:
+            jbuton0.doClick();
+            break;
+            case 96:
+            jbuton0.doClick();
+            break;
+            case 49:
+            jbuton1.doClick();
+            break;
+            case 97:
+            jbuton1.doClick();
+            break;
+            case 50:
+            jbuton2.doClick();
+            break;
+            case 98:
+            jbuton2.doClick();
+            break;
+            case 51:
+            jbuton3.doClick();
+            break;
+            case 99:
+            jbuton3.doClick();
+            break;
+            case 52:
+            jbuton4.doClick();
+            break;
+            case 100:
+            jbuton4.doClick();
+            break;
+            case 53:
+            jbuton5.doClick();
+            break;
+            case 101:
+            jbuton5.doClick();
+            break;
+            case 54:
+            jbuton6.doClick();
+            break;
+            case 102:
+            jbuton6.doClick();
+            break;
+            case 55:
+            jbuton7.doClick();
+            break;
+            case 103:
+            jbuton7.doClick();
+            break;
+            case 56:
+            jbuton8.doClick();
+            break;
+            case 104:
+            jbuton8.doClick();
+            break;
+            case 57:
+            jbuton9.doClick();
+            break;
+            case 105:
+            jbuton9.doClick();
+            break;
+            case 127:
+            jbutonErase.doClick();
+            break;
+            case 110:
+            jbutonPoint.doClick();
+            break;
+            case 10:
+            jbuttonRezult.doClick();
+            break;
+            case 107:
+            jbutonAdd.doClick();
+            break;
+            case 109:
+            jbutonSub.doClick();
+            break;
+            case 106:
+            jbutonMult.doClick();
+            break;
+            case 111:
+            jbutonDiv.doClick();
+            break;
+        }
+    }
+
+    public void keyReleased(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {}
+
     private String operation;
     private JPanel jpaneltext;
     private JPanel jpanelbuttons;
@@ -42,14 +136,22 @@ public class Calculator extends JFrame{
     private JButton jbutonPoint;
     private JButton jbuttonRezult;
     private JLabel jlabelrez;
+    private double interRez;
+    private boolean neederase;
     
     public Calculator()
     {
+        neederase = false;
+        interRez = 0;
         setTitle("Calculator");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(Constants.WIDTH, Constants.HEIGHT);
         setLocationByPlatform(true);
         addWindowStateListener(this::windowStateChanged); //Не позволяем развернуться
+        addKeyListener(this);
+        setFocusable(true);
+        setFocusTraversalKeysEnabled(false);
+     
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
         GridBagConstraints  gridbagcontaints = new GridBagConstraints(); 
@@ -107,10 +209,6 @@ public class Calculator extends JFrame{
         InitButtons();
         //Расставим кнопки по местам
         PutBttons();
-        
-        
-        //jbuton0.addActionListener(this.on);
-        
 
     }
     
@@ -148,8 +246,11 @@ public class Calculator extends JFrame{
         jbutonAdd = new JButton("+");
         jbutonAdd.addActionListener(onButtonAddClick);
         jbutonSub = new JButton("-");
+        jbutonSub.addActionListener(onButtonSubClick);
         jbutonDiv = new JButton("/");
+        jbutonDiv.addActionListener(onButtonDivClick);
         jbutonMult = new JButton("*");
+        jbutonMult.addActionListener(onButtonMultClick);
         jbutonErase = new JButton("CE");
         jbutonErase.addActionListener(onButtonErase);
         jbutonPoint = new JButton(".");
@@ -214,33 +315,80 @@ public class Calculator extends JFrame{
         jpanelrezbutton.add(jbuttonRezult,gridbagcontaintsButtonRez); 
     }
     
-    private static double GetResult(String ch1,String ch2,String oper)
+    private double GetResult(String ch2,double d1,String oper)
     {
-        double d1 = Double.valueOf(ch1);
         double d2 = Double.valueOf(ch2);
         double dRez = 0;
+        
         switch (oper)
         {
             case "+":
-            dRez = d1+d2;
+                dRez = d1+d2;
+            break;
+            case "-":
+                dRez = d1-d2;
+            break;
+            case "*":
+                dRez = d1*d2;
+            break;
+            case "/":
+                dRez = d1/d2;
             break;
         }
-        
         return dRez;
+    }
+    
+    private void EraseCalc()
+    {
+        jlabelrez.setText(" ");
+        neederase = false;
+        interRez = 0;
+        operation = null;
+    }
+    
+    private void InsOperation(String oper)
+    {
+        if (operation != null)
+        {
+            if (!neederase)
+            {
+                interRez = GetResult(jtextfield.getText(),interRez, operation); 
+                operation = oper;
+                jlabelrez.setText(jlabelrez.getText()+jtextfield.getText()+operation);
+                jtextfield.setText(interRez==(long)interRez ? String.format("%d", (long)interRez): String.format("%s",interRez));
+                
+            }
+            else
+            {
+                operation = oper;
+                jlabelrez.setText(jlabelrez.getText().substring(0,jlabelrez.getText().length()-1)+operation);
+            }
+        }
+        else
+        {
+             operation = oper;
+             interRez = Double.valueOf(jtextfield.getText());
+             jlabelrez.setText(jlabelrez.getText()+jtextfield.getText()+operation);
+        }
+        neederase = true;
     }
     
     private ActionListener onButtonRezult = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
-                if (!jlabelrez.getText().equals(" "))
-                {
-                    double drez = GetResult(jlabelrez.getText(), jtextfield.getText(), operation);
-                    jlabelrez.setText(" ");
-                    if (drez == (long)drez)
-                       jtextfield.setText(String.format("%d", (long)drez));
-                    else
-                       jtextfield.setText(String.format("%s",drez));
-                }
+                if (jlabelrez.getText().equals(" "))
+                    return;
+                double drez = 0;
+                //if (!neederase)
+                    drez = GetResult(jtextfield.getText(),interRez, operation);
+                //else
+                  //  drez = interRez;
+                if (drez == (long)drez)
+                    jtextfield.setText(String.format("%d", (long)drez));
+                else
+                    jtextfield.setText(String.format("%s",drez));
+                EraseCalc();
+                neederase = true;
         }
     };
     
@@ -248,18 +396,43 @@ public class Calculator extends JFrame{
         @Override
         public void actionPerformed(ActionEvent evt) {
                 jtextfield.setText("0");
-                jlabelrez.setText(" ");
-                operation = null;
+                EraseCalc();
         }
     };
     
     private ActionListener onButtonAddClick = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
-            operation = "+";
-            
-            jlabelrez.setText(jlabelrez.getText()+jtextfield.getText());
-            jtextfield.setText("0");
+            InsOperation("+");
+        }
+    };
+    
+    private ActionListener onButtonMultClick = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+            InsOperation("*");
+        }
+    };
+     
+    private ActionListener onButtonSubClick = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+            InsOperation("-");            
+        }
+    };
+    
+    private ActionListener onButtonDivClick = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+            if (jlabelrez.equals("0"))
+            {
+                EraseCalc();
+                jtextfield.setText("Error");
+            }
+            else
+            {
+                InsOperation("/");
+            }
         }
     };
     
@@ -268,12 +441,19 @@ public class Calculator extends JFrame{
         public void actionPerformed(ActionEvent evt) {
             if (!jtextfield.getText().equals("0"))
                 jtextfield.setText(jtextfield.getText()+"0");
+            if (neederase)
+                neederase = false;
         }
     };
     
      private ActionListener onButton1Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "1" : jtextfield.getText()+"1");
         }
     };
@@ -281,6 +461,11 @@ public class Calculator extends JFrame{
     private ActionListener onButton2Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "2" : jtextfield.getText()+"2");
         }
     };
@@ -288,6 +473,11 @@ public class Calculator extends JFrame{
      private ActionListener onButton3Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "3" : jtextfield.getText()+"3");
         }
     };
@@ -295,6 +485,11 @@ public class Calculator extends JFrame{
     private ActionListener onButton4Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "4" : jtextfield.getText()+"4");
         }
     };
@@ -303,6 +498,11 @@ public class Calculator extends JFrame{
      private ActionListener onButton5Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "5" : jtextfield.getText()+"5");
         }
     };
@@ -310,6 +510,11 @@ public class Calculator extends JFrame{
     private ActionListener onButton6Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "6" : jtextfield.getText()+"6");
         }
     }; 
@@ -317,6 +522,11 @@ public class Calculator extends JFrame{
     private ActionListener onButton7Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "7" : jtextfield.getText()+"7");
         }
     }; 
@@ -324,6 +534,11 @@ public class Calculator extends JFrame{
     private ActionListener onButton8Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "8" : jtextfield.getText()+"8");
         }
     }; 
@@ -331,6 +546,11 @@ public class Calculator extends JFrame{
     private ActionListener onButton9Click = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().equals("0") ? "9" : jtextfield.getText()+"9");
         }
     };   
@@ -338,8 +558,14 @@ public class Calculator extends JFrame{
     private ActionListener onButtonPointClick = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+            if (neederase)
+            {
+                neederase = false;
+                jtextfield.setText("0");
+            }
             jtextfield.setText(jtextfield.getText().indexOf(".") == -1 ? jtextfield.getText()+"." : jtextfield.getText());
         }
     }; 
+    
     
 }
