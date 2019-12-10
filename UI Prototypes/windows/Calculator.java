@@ -5,6 +5,9 @@ import java.awt.event.*;
 import java.awt.Frame.*;
 import static java.awt.Frame.MAXIMIZED_BOTH;
 import static java.awt.Frame.NORMAL;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.text.*;
 import javax.swing.text.*;
 import javax.swing.*;
@@ -138,6 +141,8 @@ public class Calculator extends JFrame implements KeyListener{
     private JLabel jlabelrez;
     private double interRez;
     private boolean neederase;
+    private Clipboard clipboard;
+    private StringSelection selection;
     
     public Calculator()
     {
@@ -151,7 +156,8 @@ public class Calculator extends JFrame implements KeyListener{
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
-     
+        selection = new StringSelection(null);
+        clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();        
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
         GridBagConstraints  gridbagcontaints = new GridBagConstraints(); 
@@ -356,7 +362,6 @@ public class Calculator extends JFrame implements KeyListener{
                 operation = oper;
                 jlabelrez.setText(jlabelrez.getText()+jtextfield.getText()+operation);
                 jtextfield.setText(interRez==(long)interRez ? String.format("%d", (long)interRez): String.format("%s",interRez));
-                
             }
             else
             {
@@ -370,6 +375,9 @@ public class Calculator extends JFrame implements KeyListener{
              interRez = Double.valueOf(jtextfield.getText());
              jlabelrez.setText(jlabelrez.getText()+jtextfield.getText()+operation);
         }
+        
+        selection = new StringSelection(jlabelrez.getText());
+        clipboard.setContents(selection, selection);
         neederase = true;
     }
     
