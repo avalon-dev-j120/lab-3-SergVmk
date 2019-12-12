@@ -1,5 +1,7 @@
 package windows;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.*;
 import javax.swing.*;
 import java.util.*;
@@ -18,10 +20,15 @@ public class PalleteWindow extends JFrame{
         private JSlider sliderR;
         private JSlider sliderG;
         private JSlider sliderB;
+        
+        private Clipboard clipboard;
+        private StringSelection selection;
 
     public PalleteWindow()
     {
         setTitle("Color picker");
+        selection = new StringSelection(null);
+        clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();        
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(Constants.WIDTH, Constants.HEIGHT);
         setLocationByPlatform(true);
@@ -96,6 +103,8 @@ public class PalleteWindow extends JFrame{
     {
         jpanelColor.setBackground(new Color(sliderR.getValue(),sliderG.getValue(),sliderB.getValue()));
         jpanelColor.setToolTipText("#"+Integer.toString(sliderR.getValue(),16)+Integer.toString(sliderG.getValue(),16)+Integer.toString(sliderB.getValue(),16));
+        selection = new StringSelection(jpanelColor.getToolTipText());
+        clipboard.setContents(selection, selection);
     }
     
 }
